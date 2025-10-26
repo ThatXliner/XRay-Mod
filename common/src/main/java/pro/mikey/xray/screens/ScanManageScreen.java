@@ -75,19 +75,19 @@ public class ScanManageScreen extends GuiBase {
         this.render = Minecraft.getInstance().getItemRenderer();
         this.children().clear();
 
-        this.scrollList = new ScanEntryScroller(((getWidth() / 2) - (203 / 2)) - 37, getHeight() / 2 + 10, 203, 185, this);
+        this.scrollList = new ScanEntryScroller(((getWidth() / 2) - (230 / 2)) - 37, getHeight() / 2 + 10, 230, 155, this);
         addRenderableWidget(this.scrollList);
 
-        this.search = new EditBox(getFontRender(), getWidth() / 2 - 137, getHeight() / 2 - 105, 202, 18, Component.empty());
+        this.search = new EditBox(getFontRender(), getWidth() / 2 - 150, getHeight() / 2 - 105, 228, 18, Component.empty());
         this.search.setCanLoseFocus(true);
         addRenderableWidget(this.search);
 
         // side bar buttons
-        addRenderableWidget(new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 - 60, 120, 20, Component.translatable("xray.input.add"), "xray.tooltips.add_block", button -> {
+        addRenderableWidget(new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 - 75, 120, 20, Component.translatable("xray.input.add"), "xray.tooltips.add_block", button -> {
             minecraft.setScreen(new FindBlockScreen());
         }));
 
-        addRenderableWidget(new SupportButtonInner(getWidth() / 2 + 79, getHeight() / 2 - 38, 120, 20, Component.translatable("xray.input.add_hand"), "xray.tooltips.add_block_in_hand", button -> {
+        addRenderableWidget(new SupportButtonInner(getWidth() / 2 + 79, getHeight() / 2 - 55, 120, 20, Component.translatable("xray.input.add_hand"), "xray.tooltips.add_block_in_hand", button -> {
             ItemStack handItem = minecraft.player.getItemInHand(InteractionHand.MAIN_HAND);
 
             // Check if the hand item is a block or not
@@ -100,7 +100,7 @@ public class ScanManageScreen extends GuiBase {
             minecraft.setScreen(new ScanConfigureScreen(((BlockItem) handItem.getItem()).getBlock(), ScanManageScreen::new));
         }));
 
-        addRenderableWidget(new SupportButtonInner(getWidth() / 2 + 79, getHeight() / 2 - 16, 120, 20, Component.translatable("xray.input.add_look"), "xray.tooltips.add_block_looking_at", button -> {
+        addRenderableWidget(new SupportButtonInner(getWidth() / 2 + 79, getHeight() / 2 - 35, 120, 20, Component.translatable("xray.input.add_look"), "xray.tooltips.add_block_looking_at", button -> {
             Player player = minecraft.player;
             if (minecraft.level == null || player == null) {
                 return;
@@ -128,17 +128,17 @@ public class ScanManageScreen extends GuiBase {
             }
         }));
 
-        addRenderableWidget(distButtons = new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 + 6, 120, 20, Component.translatable("xray.input.show-lava", ScanController.INSTANCE.isLavaActive()), "xray.tooltips.show_lava", button -> {
+        addRenderableWidget(distButtons = new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 - 15, 120, 20, Component.translatable("xray.input.show-lava", ScanController.INSTANCE.isLavaActive()), "xray.tooltips.show_lava", button -> {
             ScanController.INSTANCE.toggleLava();
             button.setMessage(Component.translatable("xray.input.show-lava", ScanController.INSTANCE.isLavaActive()));
         }));
 
-        addRenderableWidget(distButtons = new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 + 36, 120, 20, Component.translatable("xray.input.distance", ScanController.INSTANCE.getVisualRadius()), "xray.tooltips.distance", button -> {
+        addRenderableWidget(distButtons = new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 + 10, 120, 20, Component.translatable("xray.input.distance", ScanController.INSTANCE.getVisualRadius()), "xray.tooltips.distance", button -> {
             ScanController.INSTANCE.incrementCurrentDist();
             button.setMessage(Component.translatable("xray.input.distance", ScanController.INSTANCE.getVisualRadius()));
         }));
 
-        addRenderableWidget(opacityButton = new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 + 58, 120, 20, Component.translatable("xray.input.outline_opacity", Configuration.INSTANCE.outlineOpacity.get()), "xray.tooltips.outline_opacity", button -> {
+        addRenderableWidget(opacityButton = new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 + 35, 120, 20, Component.translatable("xray.input.outline_opacity", Configuration.INSTANCE.outlineOpacity.get()), "xray.tooltips.outline_opacity", button -> {
             int currentOpacity = Configuration.INSTANCE.outlineOpacity.get();
             int newOpacity = (currentOpacity + 10) % 110; // 0, 10, 20, ..., 100, then back to 0
             Configuration.INSTANCE.outlineOpacity.set(newOpacity);
@@ -150,7 +150,7 @@ public class ScanManageScreen extends GuiBase {
             Button.builder(Component.translatable("xray.single.help"), button -> {
                 minecraft.setScreen(new HelpScreen());
             })
-                    .pos(getWidth() / 2 + 79, getHeight() / 2 + 80)
+                    .pos(getWidth() / 2 + 79, getHeight() / 2 + 60)
                     .size(60, 20)
                     .build()
         );
@@ -159,7 +159,7 @@ public class ScanManageScreen extends GuiBase {
                 Button.builder(Component.translatable("xray.single.close"), button -> {
                     this.onClose();
                 })
-                        .pos((getWidth() / 2 + 79) + 62, getHeight() / 2 + 80)
+                        .pos((getWidth() / 2 + 79) + 62, getHeight() / 2 + 60)
                         .size(59, 20)
                         .build()
         );
@@ -220,7 +220,7 @@ public class ScanManageScreen extends GuiBase {
     @Override
     public void renderExtra(GuiGraphics graphics, int x, int y, float partialTicks) {
         if (!search.isFocused() && search.getValue().isEmpty()) {
-            graphics.drawString(getFontRender(), I18n.get("xray.single.search"), getWidth() / 2 - 130, getHeight() / 2 - 101, Color.GRAY.getRGB());
+            graphics.drawString(getFontRender(), I18n.get("xray.single.search"), getWidth() / 2 - 143, getHeight() / 2 - 101, Color.GRAY.getRGB());
         }
 
         Matrix3x2fStack pose = graphics.pose();
@@ -258,7 +258,7 @@ public class ScanManageScreen extends GuiBase {
 
         @Override
         public int getRowWidth() {
-            return 188;
+            return 215;
         }
 
         @Override
