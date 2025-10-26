@@ -22,6 +22,7 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import pro.mikey.xray.Configuration;
 import pro.mikey.xray.XRay;
 
 import java.io.Closeable;
@@ -97,9 +98,12 @@ public class OutlineRender {
 					final float red = (blockProps.color() >> 16 & 0xff) / 255f;
 					final float green = (blockProps.color() >> 8 & 0xff) / 255f;
 					final float blue = (blockProps.color() & 0xff) / 255f;
-					
+
 					// Use the alpha from the color, or default to 1.0 if alpha is 0
-					final float opacity = alpha > 0 ? alpha : 1.0f;
+					// Then multiply by the global opacity setting (0-100 converted to 0.0-1.0)
+					final float baseOpacity = alpha > 0 ? alpha : 1.0f;
+					final float globalOpacity = Configuration.INSTANCE.outlineOpacity.get() / 100f;
+					final float opacity = baseOpacity * globalOpacity;
 
 					ShapeRenderer.renderLineBox(poseStack.last(), bufferBuilder, x, y, z, x + size, y + size, z + size, red, green, blue, opacity);
 				}

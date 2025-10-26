@@ -29,9 +29,12 @@ import pro.mikey.xray.core.scanner.BlockScanType;
 import pro.mikey.xray.core.scanner.ScanStore;
 import pro.mikey.xray.core.scanner.ScanType;
 import pro.mikey.xray.screens.helpers.GuiBase;
+import pro.mikey.xray.screens.helpers.ImageButton;
 import pro.mikey.xray.screens.helpers.SupportButton;
 import pro.mikey.xray.utils.Utils;
+import pro.mikey.xray.Configuration;
 import pro.mikey.xray.XRay;
+import pro.mikey.xray.core.OutlineRender;
 import pro.mikey.xray.core.ScanController;
 
 import java.awt.*;
@@ -43,6 +46,7 @@ public class ScanManageScreen extends GuiBase {
     private static final ResourceLocation CIRCLE = XRay.assetLocation("gui/circle.png");
 
     private Button distButtons;
+    private Button opacityButton;
     private EditBox search;
     public ItemRenderer render;
 
@@ -134,11 +138,19 @@ public class ScanManageScreen extends GuiBase {
             button.setMessage(Component.translatable("xray.input.distance", ScanController.INSTANCE.getVisualRadius()));
         }));
 
+        addRenderableWidget(opacityButton = new SupportButtonInner((getWidth() / 2) + 79, getHeight() / 2 + 58, 120, 20, Component.translatable("xray.input.outline_opacity", Configuration.INSTANCE.outlineOpacity.get()), "xray.tooltips.outline_opacity", button -> {
+            int currentOpacity = Configuration.INSTANCE.outlineOpacity.get();
+            int newOpacity = (currentOpacity + 10) % 110; // 0, 10, 20, ..., 100, then back to 0
+            Configuration.INSTANCE.outlineOpacity.set(newOpacity);
+            button.setMessage(Component.translatable("xray.input.outline_opacity", Configuration.INSTANCE.outlineOpacity.get()));
+            OutlineRender.requestedRefresh = true;
+        }));
+
         addRenderableWidget(
             Button.builder(Component.translatable("xray.single.help"), button -> {
                 minecraft.setScreen(new HelpScreen());
             })
-                    .pos(getWidth() / 2 + 79, getHeight() / 2 + 58)
+                    .pos(getWidth() / 2 + 79, getHeight() / 2 + 80)
                     .size(60, 20)
                     .build()
         );
@@ -147,7 +159,7 @@ public class ScanManageScreen extends GuiBase {
                 Button.builder(Component.translatable("xray.single.close"), button -> {
                     this.onClose();
                 })
-                        .pos((getWidth() / 2 + 79) + 62, getHeight() / 2 + 58)
+                        .pos((getWidth() / 2 + 79) + 62, getHeight() / 2 + 80)
                         .size(59, 20)
                         .build()
         );
@@ -188,6 +200,18 @@ public class ScanManageScreen extends GuiBase {
             ScanController.INSTANCE.decrementCurrentDist();
             distButtons.setMessage(Component.translatable("xray.input.distance", ScanController.INSTANCE.getVisualRadius()));
             distButtons.playDownSound(Minecraft.getInstance().getSoundManager());
+        }
+
+        if (event.button() == 1 && opacityButton.isMouseOver(event.x(), event.y())) {
+            int currentOpacity = Configuration.INSTANCE.outlineOpacity.get();
+            int newOpacity = currentOpacity - 10;
+            if (newOpacity < 0) {
+                newOpacity = 100;
+            }
+            Configuration.INSTANCE.outlineOpacity.set(newOpacity);
+            opacityButton.setMessage(Component.translatable("xray.input.outline_opacity", Configuration.INSTANCE.outlineOpacity.get()));
+            opacityButton.playDownSound(Minecraft.getInstance().getSoundManager());
+            OutlineRender.requestedRefresh = true;
         }
 
         return super.mouseClicked(event, bl);
@@ -282,6 +306,8 @@ public class ScanManageScreen extends GuiBase {
             private final ScanType entry;
             private final ScanEntryScroller parent;
             private final ItemStack icon;
+            private final Button editButton;
+            private final Button deleteButton;
 
             ScanSlot(ScanType entry, ScanEntryScroller parent) {
                 this.entry = entry;
@@ -292,6 +318,24 @@ public class ScanManageScreen extends GuiBase {
                 } else {
                     this.icon = ItemStack.EMPTY;
                 }
+
+                // Create edit button with vertical ellipsis character
+                this.editButton = Button.builder(Component.literal("⋮"), button -> {
+                    Minecraft.getInstance().setScreen(new ScanConfigureScreen(entry, ScanManageScreen::new));
+                }).size(16, 16).build();
+
+                // Create delete button with trash icon
+                this.deleteButton = ImageButton.builder(button -> {
+                    // Remove the entry from the scan store
+                    ScanController.INSTANCE.scanStore.removeEntry(entry);
+                    // Refresh the list
+                    parent.updateEntries();
+                    // Clear VBOs to update rendering
+                    OutlineRender.clearVBOs();
+                })
+                .size(16, 16)
+                .image(XRay.assetLocation("gui/trash.png"), 16, 16)
+                .build();
             }
 
             @Override
@@ -303,17 +347,42 @@ public class ScanManageScreen extends GuiBase {
 
                 guiGraphics.renderItem(this.icon, this.getContentX(), this.getContentY() + 7);
 
+                // Position and render the buttons
+                int buttonY = (int) (this.getContentY() + (this.getHeight() / 2f) - 8);
+
+                // Delete button (far right)
+                this.deleteButton.setX((this.getContentX() + this.getWidth()) - 18);
+                this.deleteButton.setY(buttonY);
+                this.deleteButton.render(guiGraphics, mouseX, mouseY, partialTicks);
+
+                // Edit button (left of delete)
+                this.editButton.setX((this.getContentX() + this.getWidth()) - 38);
+                this.editButton.setY(buttonY);
+                this.editButton.render(guiGraphics, mouseX, mouseY, partialTicks);
+
+                // Color circle preview (moved left to make room for buttons)
                 var stack = guiGraphics.pose();
                 stack.pushMatrix();
 
-                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ScanManageScreen.CIRCLE, (this.getContentX() + this.getWidth()) - 23, (int) (this.getContentY() + (this.getHeight() / 2f) - 9), 0, 0, 14, 14, 14, 14, 0x7F000000);
-                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ScanManageScreen.CIRCLE, (this.getContentX() + this.getWidth()) - 21, (int) (this.getContentY() + (this.getHeight() / 2f) - 7), 0, 0, 10, 10, 10, 10, 0xFF000000 | this.entry.colorInt());
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ScanManageScreen.CIRCLE, (this.getContentX() + this.getWidth()) - 60, (int) (this.getContentY() + (this.getHeight() / 2f) - 9), 0, 0, 14, 14, 14, 14, 0x7F000000);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ScanManageScreen.CIRCLE, (this.getContentX() + this.getWidth()) - 58, (int) (this.getContentY() + (this.getHeight() / 2f) - 7), 0, 0, 10, 10, 10, 10, 0xFF000000 | this.entry.colorInt());
 
                 stack.popMatrix();
             }
 
             @Override
             public boolean mouseClicked(MouseButtonEvent mouse, boolean bl) {
+                // Check if click is on edit button
+                if (this.editButton.mouseClicked(mouse, bl)) {
+                    return true;
+                }
+
+                // Check if click is on delete button
+                if (this.deleteButton.mouseClicked(mouse, bl)) {
+                    return true;
+                }
+
+                // Fall back to default behavior (toggle enable/disable, or shift+click to edit)
                 this.parent.setSelected(this, mouse);
                 return false;
             }

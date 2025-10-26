@@ -40,6 +40,12 @@ public enum Configuration {
             .comment("When true, lava will automatically be added to the scan list when XRay is enabled.")
                     .build();
 
+    public final ConfigValue<Integer> outlineOpacity = integer("outlineOpacity", () -> 100)
+            .comment("Global opacity multiplier for all block outlines (0-100%).")
+                    .comment("This multiplies with each block's individual alpha value.")
+                    .comment("100 = fully opaque, 0 = completely transparent.")
+                    .build();
+
     Configuration() {}
 
     public void load() {
