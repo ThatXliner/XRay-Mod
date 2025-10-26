@@ -46,10 +46,10 @@ public class ScanManageScreen extends GuiBase {
     private static final ResourceLocation CIRCLE = XRay.assetLocation("gui/circle.png");
 
     // Layout constants
-    private static final int SCROLL_LIST_WIDTH = 230;
+    private static final int SCROLL_LIST_WIDTH = 200;
     private static final int SCROLL_LIST_HEIGHT = 155;
     private static final int SCROLL_LIST_OFFSET_X = 37;
-    private static final int SEARCH_BOX_WIDTH = 228;
+    private static final int SEARCH_BOX_WIDTH = 200;
     private static final int SEARCH_BOX_HEIGHT = 18;
 
     // Button dimensions
@@ -86,8 +86,8 @@ public class ScanManageScreen extends GuiBase {
     private static final int HINT_TEXT_VERTICAL_OFFSET = -3;
 
     // Search box text offsets
-    private static final int SEARCH_PLACEHOLDER_X_OFFSET = -143;
-    private static final int SEARCH_PLACEHOLDER_Y_OFFSET = -101;
+    private static final int SEARCH_PLACEHOLDER_X_OFFSET = 7; // Relative offset within the search box
+    private static final int SEARCH_PLACEHOLDER_Y_OFFSET = 4;  // Relative offset within the search box
 
     private Button distButtons;
     private Button opacityButton;
@@ -122,7 +122,9 @@ public class ScanManageScreen extends GuiBase {
         this.scrollList = new ScanEntryScroller(((getWidth() / 2) - (SCROLL_LIST_WIDTH / 2)) - SCROLL_LIST_OFFSET_X, getHeight() / 2 + SCROLL_LIST_Y_OFFSET, SCROLL_LIST_WIDTH, SCROLL_LIST_HEIGHT, this);
         addRenderableWidget(this.scrollList);
 
-        this.search = new EditBox(getFontRender(), getWidth() / 2 - 150, getHeight() / 2 + SEARCH_BOX_Y_OFFSET, SEARCH_BOX_WIDTH, SEARCH_BOX_HEIGHT, Component.empty());
+        // Align search box with scroll list
+        int searchX = ((getWidth() / 2) - (SEARCH_BOX_WIDTH / 2)) - SCROLL_LIST_OFFSET_X;
+        this.search = new EditBox(getFontRender(), searchX, getHeight() / 2 + SEARCH_BOX_Y_OFFSET, SEARCH_BOX_WIDTH, SEARCH_BOX_HEIGHT, Component.empty());
         this.search.setCanLoseFocus(true);
         addRenderableWidget(this.search);
 
@@ -264,7 +266,9 @@ public class ScanManageScreen extends GuiBase {
     @Override
     public void renderExtra(GuiGraphics graphics, int x, int y, float partialTicks) {
         if (!search.isFocused() && search.getValue().isEmpty()) {
-            graphics.drawString(getFontRender(), I18n.get("xray.single.search"), getWidth() / 2 + SEARCH_PLACEHOLDER_X_OFFSET, getHeight() / 2 + SEARCH_PLACEHOLDER_Y_OFFSET, Color.GRAY.getRGB());
+            // Calculate search box position and add relative offset for placeholder text
+            int searchX = ((getWidth() / 2) - (SEARCH_BOX_WIDTH / 2)) - SCROLL_LIST_OFFSET_X;
+            graphics.drawString(getFontRender(), I18n.get("xray.single.search"), searchX + SEARCH_PLACEHOLDER_X_OFFSET, getHeight() / 2 + SEARCH_BOX_Y_OFFSET + SEARCH_PLACEHOLDER_Y_OFFSET, Color.GRAY.getRGB());
         }
 
         Matrix3x2fStack pose = graphics.pose();
@@ -291,7 +295,7 @@ public class ScanManageScreen extends GuiBase {
 
     class ScanEntryScroller extends ObjectSelectionList<ScanEntryScroller.ScanSlot> {
         static final int SLOT_HEIGHT = 35;
-        static final int ROW_WIDTH = 215;
+        static final int ROW_WIDTH = 185; // Adjusted to match new scroll list width
         static final int SCROLLBAR_OFFSET = 6;
         static final int LIST_OFFSET_X = 36;
         public ScanManageScreen parent;
