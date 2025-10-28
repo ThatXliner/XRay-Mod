@@ -53,7 +53,6 @@ public class XRayNeoForge {
 	}
 
 	public void registerKeyBinding(RegisterKeyMappingsEvent event) {
-		event.registerCategory(XRay.CATEGORY);
 		event.register(XRay.TOGGLE_KEY);
 		event.register(XRay.OPEN_GUI_KEY);
 	}
