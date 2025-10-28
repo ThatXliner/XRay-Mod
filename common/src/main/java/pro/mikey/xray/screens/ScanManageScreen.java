@@ -47,7 +47,7 @@ public class ScanManageScreen extends GuiBase {
 
     // Layout constants
     private static final int SCROLL_LIST_WIDTH = 200;
-    private static final int SCROLL_LIST_HEIGHT = 155;
+    private static final int SCROLL_LIST_HEIGHT = 175; // Increased to reduce bottom padding
     private static final int SCROLL_LIST_OFFSET_X = 37;
     private static final int SEARCH_BOX_WIDTH = 200;
     private static final int SEARCH_BOX_HEIGHT = 18;
@@ -295,7 +295,7 @@ public class ScanManageScreen extends GuiBase {
 
     class ScanEntryScroller extends ObjectSelectionList<ScanEntryScroller.ScanSlot> {
         static final int SLOT_HEIGHT = 35;
-        static final int ROW_WIDTH = 185; // Adjusted to match new scroll list width
+        static final int ROW_WIDTH = 175; // Narrower to add padding between content and scrollbar
         static final int SCROLLBAR_OFFSET = 6;
         static final int LIST_OFFSET_X = 36;
         public ScanManageScreen parent;
